@@ -1,4 +1,4 @@
-# [Link para trabalho aqui](https://github.com/gufernandez/PorrinhaGame)
+# [Porrinha, The Game](https://github.com/gufernandez/PorrinhaGame)
 
 
  <img align = "left" src=https://octodex.github.com/images/baracktocat.jpg width="190" height="190"  hspace="20" vspace="5" alt="Octocat">
@@ -137,3 +137,9 @@ Tags servem para manter um certo controle da versão "oficial" do programa, serv
 <p align="center"> 
  <a href=https://imgs.xkcd.com/comics/new_bug.png><img src=https://imgs.xkcd.com/comics/new_bug.png a=https://imgs.xkcd.com/comics/new_bug.png></a>
 </p>
+
+
+
+## Sobre essa README:
+
+ Foi confeccionada pelo querido Chamys: *https://github.com/mrtheduts/readmegit*
