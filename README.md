@@ -1,2 +1,0 @@
-# PorrinhaGame
-Jogo dos palitos
