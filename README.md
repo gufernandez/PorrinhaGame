@@ -1,4 +1,4 @@
-# [Link para trabalho aqui](https://www.github.com/mrtheduts/readmegit)
+# [Link para trabalho aqui](https://github.com/gufernandez/PorrinhaGame)
 
 
  <img align = "left" src=https://octodex.github.com/images/baracktocat.jpg width="190" height="190"  hspace="20" vspace="5" alt="Octocat">
