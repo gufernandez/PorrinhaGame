@@ -73,7 +73,7 @@ ARCHITECTURE behavior OF TEST IS
 	SHARED VARIABLE user_screen : STD_LOGIC_VECTOR (0 to VECTOR_SIZE-1);
 	SHARED VARIABLE number_screen : STD_LOGIC_VECTOR (0 to N_VECTOR_SIZE-1);
 	SHARED VARIABLE normal_video_address : INTEGER := -1;
-	SHARED VARIABLE number_video_address : INTEGER := N_BEGIN - 1;
+	SHARED VARIABLE number_video_address : INTEGER := N_BEGIN-1;
 	SHARED VARIABLE last_number	: STD_LOGIC_VECTOR (2 DOWNTO 0) := "000";
 	SHARED VARIABLE last_screen	: STD_LOGIC_VECTOR (1 DOWNTO 0) := "00";
 	SHARED VARIABLE print_number, printed_number, print_screen, printed_screen : STD_LOGIC := '0';
@@ -107,6 +107,26 @@ BEGIN
 		hsync			=> VGA_HS		,
 		vsync			=> VGA_VS		
 	);
+	
+	--clock_divider:
+	--PROCESS (clk27M, reset)
+	--	VARIABLE i : INTEGER := 0;
+	--BEGIN
+	--	IF (reset = '0') THEN
+	--		i := 0;
+	--		slow_clock <= '0';
+	--	ELSIF (rising_edge(clk27M)) THEN
+	--		IF (i <= CONS_CLOCK_DIV/2) THEN
+	--			i := i + 1;
+	--			slow_clock <= '0';
+	--		ELSIF (i < CONS_CLOCK_DIV-1) THEN
+	--			i := i + 1;
+	--			slow_clock <= '1';
+	--		ELSE		
+	--			i := 0;
+	--		END IF;	
+	--	END IF;
+	--END PROCESS;
 ---------------------------------------------------------------------------------------------------------------------------------------------
 	addressing:
 	PROCESS (normal_video_word, clear_video_address, clear_video_word, number_video_word, normal_video_word)
@@ -168,7 +188,6 @@ BEGIN
 			print_number := '0';
 		ELSIF (printed_screen = '1') THEN
 			print_screen := '0';
-		--(last_screen(0) /= display_screen(0)) AND (last_screen(1) /= display_screen(1))
 		ELSIF (last_screen /= display_screen) THEN
 			last_screen := display_screen;
 			CASE last_screen IS
@@ -228,6 +247,8 @@ BEGIN
 					normal_video_address := -1;
 					printed_screen := '1';
 				END IF;
+			ELSE
+				printed_screen := '0';
 			END IF;
 		END IF;	
 	END PROCESS;
@@ -236,36 +257,38 @@ BEGIN
 	PROCESS (clk27M, reset)
 	
 	VARIABLE number_counter, line_counter: integer := 0;
-	VARIABLE column_counter: integer := N_WIDTH;
+	VARIABLE column_counter: integer := 0;
 	
 	BEGIN
 		IF (reset = '0') THEN
 			number_counter := 0;
-			column_counter := N_WIDTH;
+			column_counter := 0;
 			line_counter := 0;
 			number_video_address := N_BEGIN-1;
 			
 		ELSIF (rising_edge(clk27M)) THEN
 			IF(print_number = '1') THEN
 				IF (number_counter <= N_VECTOR_SIZE-1) THEN
-					IF (column_counter = 0) THEN
+					IF (column_counter = N_WIDTH) THEN
 						line_counter := line_counter + 1;
-						column_counter := N_WIDTH;
+						column_counter := 0;
 						number_video_address := N_BEGIN + line_counter*HORZ_SIZE - 1;
 					END IF;
 						number_video_word <= number_screen(number_counter) & number_screen(number_counter+1) & number_screen(number_counter+2);
 						number_video_address := number_video_address + 1;
 						number_counter := number_counter + 3;
-						column_counter := column_counter - 1;
+						column_counter := column_counter + 1;
 						
 				ELSE
-					number_counter := 0;
-					number_video_address := N_BEGIN-1;
 					printed_number := '1';
+					number_counter := 0;
+					column_counter := 0;
+					line_counter := 0;
+					number_video_word <= "000";
+					number_video_address := N_BEGIN-1;
 				END IF;
-				IF (print_number = '0') THEN
-					printed_number := '0';
-				END IF;
+			ELSE
+				printed_number := '0';
 			END IF;
 		END IF;	
 	END PROCESS;
