@@ -14,14 +14,14 @@ COMPONENT  user IS
 -- pal: palitos colocados pelo jogadores (0 a 3)
 -- guess_user: chute do usuário da placa (0 a 6)
 
-	PORT (Choice, Guess, Fim, FimFim, clk: IN STD_LOGIC;
+	PORT (Choice, Guess, En, clk: IN STD_LOGIC;
 			guess_opt: IN STD_LOGIC_VECTOR(2 downto 0);
 			wheel_action: IN STD_LOGIC_VECTOR(1 downto 0);
 			mouse_buttons: IN STD_LOGIC_VECTOR(2 downto 0);
 			--P1, P2: IN STD_LOGIC_VECTOR(1 downto 0); N~ao faz mais sentido?
 			numero: OUT STD_LOGIC_VECTOR(2 downto 0);
 			pal: OUT STD_LOGIC_VECTOR(1 downto 0);
-			ld_output : OUT STD_LOGIC;
+			ld_output : BUFFER STD_LOGIC;
 			guess_user: OUT STD_LOGIC_VECTOR(2 downto 0));
 END COMPONENT;
 END user_package;

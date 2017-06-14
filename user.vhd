@@ -12,13 +12,13 @@ ENTITY  user IS
 -- pal: palitos colocados pelo jogadores (0 a 3)
 -- guess_user: chute do usuário da placa (0 a 6)
 
-	PORT (Choice, Guess, Fim, FimFim, clk: IN STD_LOGIC;
+	PORT (Choice, Guess, En, clk: IN STD_LOGIC;
 			guess_opt: IN STD_LOGIC_VECTOR(2 downto 0);
 			wheel_action: IN STD_LOGIC_VECTOR(1 downto 0);
 			mouse_buttons: IN STD_LOGIC_VECTOR(2 downto 0);
 			numero: OUT STD_LOGIC_VECTOR(2 downto 0);
 			pal: OUT STD_LOGIC_VECTOR(1 downto 0);
-			ld_output : OUT STD_LOGIC;
+			ld_output : BUFFER STD_LOGIC;
 			guess_user: OUT STD_LOGIC_VECTOR(2 downto 0));
 END user;
 
@@ -30,60 +30,81 @@ begin
 	wheel_down<= wheel_action(1);
 	wheel_clock <= wheel_up xor wheel_down;
 	
-	process(Choice, Guess, wheel_clock, wheel_up, wheel_down, guess_opt)
-	variable contagem, guess_opt2 : integer range 0 to 6;
+	process(Choice, Guess, wheel_clock, wheel_up, wheel_down, guess_opt, En)
+	variable contagem		:	integer range 0 to 6 :=0;
+	variable guess_opt2	:	integer range 0 to 6;
 	begin
-		guess_opt2 := conv_integer(unsigned(guess_opt));
-		if(Choice = '1' or Guess = '1') then
-			if(wheel_clock'event and wheel_clock = '1') then
-				if(wheel_up = '1') then
-					if contagem = 6 then
-						if(guess_opt2 = 0) and Guess = '1'then
-							contagem := 1;
-						else
+		if(En = '1') then
+			guess_opt2 := conv_integer(unsigned(guess_opt));
+			if(Choice = '1' or Guess = '1') then
+				if(wheel_clock'event and wheel_clock = '1') then
+					if(wheel_up = '1') then
+						if contagem = 6 then
+							if(guess_opt2 = 0) and Guess = '1'then
+								contagem := 1;
+							else
+								contagem := 0;
+							end if;
+						elsif contagem = 3 and Choice = '1' then
 							contagem := 0;
-						end if;
-					elsif contagem = 3 and Choice = '1' then
-						contagem := 0;
-					else
-						if(guess_opt2 = contagem + 1) and Guess = '1' then
-							contagem := contagem + 2;
 						else
-							contagem := contagem + 1;
+							if(guess_opt2 = contagem + 1) and Guess = '1' then
+								if(contagem = 5) then
+									contagem := 0;
+								else
+									contagem := contagem + 2;
+								end if;
+							else
+								contagem := contagem + 1;
+							end if;
 						end if;
-					end if;
-				elsif(wheel_down = '1') then
-					if contagem = 0 and Choice = '1' then
-						contagem := 3;
-					elsif contagem = 0 then
-						if(guess_opt2 = 6) and Guess = '1'then
-							contagem := 5;
+					elsif(wheel_down = '1') then
+						if contagem = 0 and Choice = '1' then
+							contagem := 3;
+						elsif contagem = 0 then
+							if(guess_opt2 = 6) and Guess = '1'then
+								contagem := 5;
+							else
+								contagem := 6;
+							end if;
 						else
-							contagem := 6;
-						end if;
-					else
-						if(guess_opt2 = contagem - 1) and Guess = '1'then
-							contagem := contagem - 2;
-						else
-							contagem := contagem - 1;
+							if(guess_opt2 = contagem - 1) and Guess = '1'then
+								if(contagem = 1) then
+									contagem := 6;
+								else
+									contagem := contagem - 2;
+								end if;
+							else
+								contagem := contagem - 1;
+							end if;
 						end if;
 					end if;
 				end if;
 			end if;
+			aux <= conv_std_logic_vector(contagem, 3);
+			numero <= conv_std_logic_vector(contagem, 3);
+		else
+			contagem :=0;
 		end if;
-		aux <= conv_std_logic_vector(contagem, 3);
-		numero <= conv_std_logic_vector(contagem, 3);
 	end process;
-
-	with mouse_buttons(0) select
-		ld_output <= '1' when '1',
-					    '0' when others;
 	
-	with mouse_buttons(0) select
-		pal <= aux(1 downto 0) when '1',
-				 "00" when others;
-	
-	with mouse_buttons(0) select
-		guess_user <= aux		when '1',
-						  "000" 	when others;
+	process(mouse_buttons, En)
+	begin
+		if(En = '1') then
+			if(mouse_buttons(0)'event and mouse_buttons(0) = '1') then
+				if(ld_output = '1') then
+					ld_output <= '0';
+				else
+					ld_output <= '1';
+				end if;
+				if Choice = '1' then
+					pal <= aux(1 downto 0);
+				elsif Guess = '1' then
+					guess_user <= aux;
+				end if;
+			end if;
+		else
+			ld_output <= '0';
+		end if;
+	end process;
 end behavior;

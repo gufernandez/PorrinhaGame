@@ -34,7 +34,7 @@ architecture behavior of demo_setup is
 begin
 	mouse1 : mouse port map(CLOCK_24, KEY, mouse_buttons, wheel_action, LEDR, PS2_DAT, PS2_CLK);
 
-	this_user: user PORT MAP ('0', '1', GPIO_0IN(2), GPIO_0IN(3), GPIO_0IN(4), "110", wheel_action, mouse_buttons, LEDG(2 DOWNTO 0),
+	this_user: user PORT MAP ('0', '1', '1', GPIO_0IN(3), "000", wheel_action, mouse_buttons, LEDG(2 DOWNTO 0),
 									  GPIO_0OUT(17 downto 16), LEDG(5),GPIO_0OUT(15 downto 13));
 	
 end behavior;
