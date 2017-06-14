@@ -76,7 +76,7 @@ ARCHITECTURE behavior OF TEST IS
 	SHARED VARIABLE number_video_address : INTEGER := N_BEGIN - 1;
 	SHARED VARIABLE last_number	: STD_LOGIC_VECTOR (2 DOWNTO 0) := "000";
 	SHARED VARIABLE last_screen	: STD_LOGIC_VECTOR (1 DOWNTO 0) := "00";
-	SHARED VARIABLE print_number, printed_number, print_screen, printed_screen : STD_LOGIC;
+	SHARED VARIABLE print_number, printed_number, print_screen, printed_screen : STD_LOGIC := '0';
 	
 	SIGNAL clear_video_address	,
 		video_address			: INTEGER RANGE 0 TO HORZ_SIZE * VERT_SIZE - 1;
@@ -164,8 +164,12 @@ BEGIN
 		
 	BEGIN
 	IF (rising_edge(clk27M)) THEN	
-	
-		IF (last_screen /= display_screen) THEN
+		IF (printed_number = '1') THEN
+			print_number := '0';
+		ELSIF (printed_screen = '1') THEN
+			print_screen := '0';
+		--(last_screen(0) /= display_screen(0)) AND (last_screen(1) /= display_screen(1))
+		ELSIF (last_screen /= display_screen) THEN
 			last_screen := display_screen;
 			CASE last_screen IS
 				WHEN "00" =>
@@ -197,10 +201,6 @@ BEGIN
 					number_screen := six;
 			END CASE;
 			print_number := '1';
-		ELSIF (printed_number = '1') THEN
-			print_number := '0';
-		ELSIF (printed_screen = '1') THEN
-			print_screen := '0';
 		END IF;
 	END IF;
 	END PROCESS;
@@ -243,27 +243,29 @@ BEGIN
 			number_counter := 0;
 			column_counter := N_WIDTH;
 			line_counter := 0;
+			number_video_address := N_BEGIN-1;
 			
 		ELSIF (rising_edge(clk27M)) THEN
-			--number_video_address := N_BEGIN - 1;
-			IF (number_counter <= N_VECTOR_SIZE-1) THEN
-				IF (column_counter = 0) THEN
-					line_counter := line_counter + 1;
-					column_counter := N_WIDTH;
-					number_video_address := N_BEGIN + line_counter*HORZ_SIZE - 1;
+			IF(print_number = '1') THEN
+				IF (number_counter <= N_VECTOR_SIZE-1) THEN
+					IF (column_counter = 0) THEN
+						line_counter := line_counter + 1;
+						column_counter := N_WIDTH;
+						number_video_address := N_BEGIN + line_counter*HORZ_SIZE - 1;
+					END IF;
+						number_video_word <= number_screen(number_counter) & number_screen(number_counter+1) & number_screen(number_counter+2);
+						number_video_address := number_video_address + 1;
+						number_counter := number_counter + 3;
+						column_counter := column_counter - 1;
+						
+				ELSE
+					number_counter := 0;
+					number_video_address := N_BEGIN-1;
+					printed_number := '1';
 				END IF;
-					number_video_word <= number_screen(number_counter) & number_screen(number_counter+1) & number_screen(number_counter+2);
-					number_video_address := number_video_address + 1;
-					number_counter := number_counter + 3;
-					column_counter := column_counter - 1;
-					
-			ELSE
-				number_counter := 0;
-				number_video_address := N_BEGIN-1;
-				printed_number := '1';
-			END IF;
-			IF (print_number = '0') THEN
-				printed_number := '0';
+				IF (print_number = '0') THEN
+					printed_number := '0';
+				END IF;
 			END IF;
 		END IF;	
 	END PROCESS;
