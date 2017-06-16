@@ -14,7 +14,7 @@ COMPONENT  user IS
 -- pal: palitos colocados pelo jogadores (0 a 3)
 -- guess_user: chute do usuário da placa (0 a 6)
 
-	PORT (Choice, Guess, En, clk: IN STD_LOGIC;
+	PORT (Choice, Guess, En, clk, Reset: IN STD_LOGIC;
 			guess_opt: IN STD_LOGIC_VECTOR(2 downto 0);
 			wheel_action: IN STD_LOGIC_VECTOR(1 downto 0);
 			mouse_buttons: IN STD_LOGIC_VECTOR(2 downto 0);
