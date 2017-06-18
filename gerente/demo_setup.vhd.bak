@@ -1,5 +1,4 @@
 library ieee;
---library work;
 library work;
 use ieee.std_logic_1164.all;
 use work.mouse_package.all;
@@ -7,8 +6,8 @@ use work.user_package.all;
 
 entity demo_setup is
 -- winner: define o vencedor da rodada
-	port (GPIO_1IN : IN STD_LOGIC_VECTOR(5 DOWNTO 0);
-			GPIO_1OUT : OUT STD_LOGIC_VECTOR(5 DOWNTO 0);
+	port (GPIO_0IN : IN STD_LOGIC_VECTOR(12 DOWNTO 0);
+			GPIO_0OUT : OUT STD_LOGIC_VECTOR(17 DOWNTO 13);
 			CLOCK_50 : in std_logic;
 			------------------------	Clock Input	 	------------------------
 			CLOCK_24	: 	in	STD_LOGIC_VECTOR (1 downto 0);	--	24 MHz
@@ -30,20 +29,17 @@ end demo_setup;
 
 architecture behavior of demo_setup is
 	TYPE state_type is (NORMAL, AGUARDANDO);
-	signal Choice, Guess, reset, En, Winner, Fim	:	std_logic;
+	signal Choice, Guess, reset, En	:	std_logic;
 	signal w	:	std_logic :='0';
 	signal state : state_type;
 	signal mouse_buttons	: std_logic_vector(2 downto 0);
-	signal wheel_action, Placar	: std_logic_vector(1 downto 0);
+	signal wheel_action	: std_logic_vector(1 downto 0);
 begin
-	Choice <= GPIO_1IN(0);
-	Guess <= GPIO_1IN(1);
-	Placar <= GPIO_1IN(3 downto 2);
-	Fim <= GPIO_1IN(4);
-	Winner <= GPIO_1IN(5);
+	Choice <= GPIO_0IN(1);
+	Guess <= GPIO_0IN(2);
+	
 	w <= Choice xor Guess;
-	LEDG(7) <= GPIO_1IN(0);
-	LEDG(6) <= GPIO_1IN(1);
+	
 	process(Clock_50)
 	begin
 		case state is
@@ -64,14 +60,14 @@ begin
 			reset <= '1';
 			En <= '1';
 		ELSE
-			reset <= '0';
-			En <= '0';
+			reset <= '1';
+			En <= '1';
 		END IF;
 	end process;
 	
 	mouse1 : mouse port map(CLOCK_24, KEY, mouse_buttons, wheel_action, LEDR, PS2_DAT, PS2_CLK);
 
-	this_user: user PORT MAP (Choice, Guess, En, '0', reset, "000", wheel_action, mouse_buttons, LEDG(2 DOWNTO 0),
-									  GPIO_1OUT(1 downto 0), GPIO_1OUT(2), GPIO_1OUT(5 downto 3));
+	this_user: user PORT MAP ('0', '1', '1', GPIO_0IN(3), KEY(0), "000", wheel_action, mouse_buttons, LEDG(2 DOWNTO 0),
+									  GPIO_0OUT(17 downto 16), LEDG(5),GPIO_0OUT(15 downto 13));
 	
 end behavior;
