@@ -1,0 +1,9 @@
+PorrinhaGame-gerente/
+backup.zip
+db/
+demo_setup.vhd.bak
+incremental_db/
+output_files/
+simulation/
+test_package.vhd.bak
+

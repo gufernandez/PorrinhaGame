@@ -3,15 +3,11 @@ USE ieee.std_logic_1164.ALL;
 
 ENTITY test IS
 	PORT (
-		--select_screen,
-		--score_1,
-		--score_2: IN STD_LOGIC_VECTOR (2 DOWNTO 0);
-			
-		display_number		: IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+		score1, score2, display_number		: IN STD_LOGIC_VECTOR (2 DOWNTO 0);
 		display_screen		: IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 		
 		clk27M				: IN STD_LOGIC;
-		reset				: IN STD_LOGIC;
+		reset					: IN STD_LOGIC;
 		VGA_R, VGA_G, VGA_B	: OUT STD_LOGIC_VECTOR (3 DOWNTO 0);
 		VGA_HS, VGA_VS		: OUT STD_LOGIC
 	);
@@ -38,8 +34,8 @@ ARCHITECTURE behavior OF TEST IS
 	CONSTANT VECTOR_SIZE : INTEGER := 36864;
 	CONSTANT N_VECTOR_SIZE : INTEGER := 420;
 	CONSTANT N_BEGIN	 : INTEGER := 6075;
-	--CONSTANT P1_SCORE		: INTEGER := 6042;
-	--CONSTANT P2_SCORE		: INTEGER := 6108;
+	CONSTANT P1_SCORE		: INTEGER := 6042;
+	CONSTANT P2_SCORE		: INTEGER := 6108;
 	CONSTANT N_WIDTH   : INTEGER := 10;
 	--CONSTANT N_HEIGHT	 : INTEGER := 14;
 	--CONSTANT CONS_CLOCK_DIV : INTEGER := 100000;
@@ -76,9 +72,10 @@ ARCHITECTURE behavior OF TEST IS
 	SHARED VARIABLE number_screen : STD_LOGIC_VECTOR (0 to N_VECTOR_SIZE-1);
 	SHARED VARIABLE normal_video_address : INTEGER := -1;
 	SHARED VARIABLE number_video_address : INTEGER := N_BEGIN-1;
+	SHARED VARIABLE address			: INTEGER := 0;
 	SHARED VARIABLE last_number	: STD_LOGIC_VECTOR (2 DOWNTO 0) := "000";
-	SHARED VARIABLE last_screen	: STD_LOGIC_VECTOR (1 DOWNTO 0) := "00";
-	SHARED VARIABLE print_number, printed_number, print_screen, printed_screen : STD_LOGIC := '0';
+	SHARED VARIABLE last_screen	: STD_LOGIC_VECTOR (1 DOWNTO 0) := "11";
+	SHARED VARIABLE print_number, printed_number, print_screen, printed_screen, number_addr, set_addr : STD_LOGIC := '0';
 	
 	SIGNAL clear_video_address	,
 		video_address			: INTEGER RANGE 0 TO HORZ_SIZE * VERT_SIZE - 1;
@@ -109,26 +106,6 @@ BEGIN
 		hsync			=> VGA_HS		,
 		vsync			=> VGA_VS		
 	);
-	
-	--clock_divider:
-	--PROCESS (clk27M, reset)
-	--	VARIABLE i : INTEGER := 0;
-	--BEGIN
-	--	IF (reset = '0') THEN
-	--		i := 0;
-	--		slow_clock <= '0';
-	--	ELSIF (rising_edge(clk27M)) THEN
-	--		IF (i <= CONS_CLOCK_DIV/2) THEN
-	--			i := i + 1;
-	--			slow_clock <= '0';
-	--		ELSIF (i < CONS_CLOCK_DIV-1) THEN
-	--			i := i + 1;
-	--			slow_clock <= '1';
-	--		ELSE		
-	--			i := 0;
-	--		END IF;	
-	--	END IF;
-	--END PROCESS;
 ---------------------------------------------------------------------------------------------------------------------------------------------
 	addressing:
 	PROCESS (normal_video_word, clear_video_address, clear_video_word, number_video_word, normal_video_word)
@@ -143,9 +120,6 @@ BEGIN
 			video_word <= clear_video_word;
 			video_address <= clear_video_address;
 		END IF;
-	--video_word <= normal_video_word WHEN state = NORMAL ELSIF clear_video_word WHEN state = CLEAR ELSE number_video_word;
-	
-	--video_address <= normal_video_address WHEN state = NORMAL ELSIF clear_video_address WHEN state = CLEAR ELSE number_video_address;
 	END PROCESS;
 ---------------------------------------------------------------------------------------------------------------------------------------------
 	vga_clear:
@@ -183,14 +157,26 @@ BEGIN
 ----------------------------------------------------------------------------------------------------------------------------------------------
 	image_reader:
 	PROCESS(clk27M, reset, zero, one, two, three, four, five, six, p1_choose, p1_guess, score, waiting)
-		
+	VARIABLE flag_screen: INTEGER range 0 to 2 := 0;
 	BEGIN
 	IF (rising_edge(clk27M)) THEN	
-		IF (printed_number = '1') THEN
+		IF (set_addr = '1') THEN
+			number_addr := '0';
+
+		ELSIF (printed_number = '1') THEN
+			if (flag_screen= 2) then
+				flag_screen:= 1;
+			elsif (flag_screen= 1) then
+				flag_screen:= 0;
+			end if;
+			
 			print_number := '0';
+			
 		ELSIF (printed_screen = '1') THEN
 			print_screen := '0';
-		ELSIF (last_screen /= display_screen) THEN
+			
+		END IF;
+		IF ((last_screen /= display_screen) AND (print_number = '0') AND (print_screen = '0')) THEN
 			last_screen := display_screen;
 			CASE last_screen IS
 				WHEN "00" =>
@@ -201,9 +187,53 @@ BEGIN
 					user_screen := p1_guess;
 				WHEN OTHERS =>
 					user_screen := score;
+					flag_screen := 2;
 			END CASE;
 			print_screen := '1';
-		ELSIF (last_number /= display_number) THEN
+			
+		ELSIF ((flag_screen/= 0)  AND (print_number = '0') AND (print_screen = '0')) THEN
+			IF (flag_screen = 1) THEN
+				CASE score1 IS
+					WHEN "000" =>
+						number_screen := zero;
+					WHEN "001" =>
+						number_screen := one;
+					WHEN "010" =>
+						number_screen := two;
+					WHEN "011" =>
+						number_screen := three;
+					WHEN "100" =>
+						number_screen := four;
+					WHEN "101" =>
+						number_screen := five;
+					WHEN OTHERS =>
+						number_screen := six;
+				END CASE;
+				address := P1_SCORE-1;
+				number_addr := '1';
+				print_number := '1';
+			ELSE
+				CASE score2 IS
+					WHEN "000" =>
+						number_screen := zero;
+					WHEN "001" =>
+						number_screen := one;
+					WHEN "010" =>
+						number_screen := two;
+					WHEN "011" =>
+						number_screen := three;
+					WHEN "100" =>
+						number_screen := four;
+					WHEN "101" =>
+						number_screen := five;
+					WHEN OTHERS =>
+						number_screen := six;
+				END CASE;
+				address := P2_SCORE-1;
+				number_addr := '1';
+				print_number := '1';
+			END IF;
+		ELSIF ((last_number /= display_number) AND (print_number = '0') AND (print_screen = '0')) THEN
 			last_number := display_number;
 			CASE last_number IS
 				WHEN "000" =>
@@ -221,6 +251,8 @@ BEGIN
 				WHEN OTHERS =>
 					number_screen := six;
 			END CASE;
+			address := N_BEGIN-1;
+			number_addr := '1';
 			print_number := '1';
 		END IF;
 	END IF;
@@ -266,15 +298,22 @@ BEGIN
 			number_counter := 0;
 			column_counter := 0;
 			line_counter := 0;
-			number_video_address := N_BEGIN-1;
+			number_video_address := address;
 			
 		ELSIF (rising_edge(clk27M)) THEN
 			IF(print_number = '1') THEN
+				IF (number_addr = '1') THEN
+					number_video_address := address;
+					set_addr := '1';
+				ELSE
+					set_addr := '0';
+				END IF;
+				
 				IF (number_counter <= N_VECTOR_SIZE-1) THEN
 					IF (column_counter = N_WIDTH) THEN
 						line_counter := line_counter + 1;
 						column_counter := 0;
-						number_video_address := N_BEGIN + line_counter*HORZ_SIZE - 1;
+						number_video_address := address + line_counter*HORZ_SIZE;
 					END IF;
 						number_video_word <= number_screen(number_counter) & number_screen(number_counter+1) & number_screen(number_counter+2);
 						number_video_address := number_video_address + 1;
@@ -287,7 +326,7 @@ BEGIN
 					column_counter := 0;
 					line_counter := 0;
 					number_video_word <= "000";
-					number_video_address := N_BEGIN-1;
+					number_video_address := address;
 				END IF;
 			ELSE
 				printed_number := '0';
