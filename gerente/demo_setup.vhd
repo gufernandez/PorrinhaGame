@@ -4,6 +4,7 @@ use ieee.std_logic_1164.all;
 use work.gerente_package.all;
 use work.mouse_package.all;
 use work.user_package.all;
+use work.test_package.all;
 
 entity demo_setup is
 	port (GPIO_1IN 		: 		IN STD_LOGIC_VECTOR(5 DOWNTO 0);
@@ -15,7 +16,9 @@ entity demo_setup is
 			LEDG				:		out	STD_LOGIC_VECTOR (7 downto 0);
 			LEDR 				:		out	STD_LOGIC_VECTOR (9 downto 0);
 			PS2_DAT 			:		inout	STD_LOGIC;	--	PS2 Data
-			PS2_CLK			:		inout	STD_LOGIC		--	PS2 Clock
+			PS2_CLK			:		inout	STD_LOGIC;		--	PS2 Clock
+			VGA_R, VGA_G, VGA_B	: out STD_LOGIC_VECTOR (3 downto 0);
+			VGA_HS, VGA_VS	: out STD_LOGIC
 		);
 end demo_setup;
 
@@ -26,13 +29,15 @@ architecture behavior of demo_setup is
 	signal state : state_type;
 	signal p2_Pal	:	std_logic_vector( 1 downto 0);
 	signal p2_Guess	:	std_logic_vector( 2 downto 0);
-	signal mouse_buttons	: std_logic_vector(2 downto 0);
+	signal mouse_buttons, number_input	: std_logic_vector(2 downto 0);
 	signal wheel_action, PlacarP1, PlacarP2	: std_logic_vector(1 downto 0);
+	signal screen	: std_logic_vector (1 downto 0);
 begin	
 
 	GPIO_1OUT(9) <= Fim;
 	GPIO_1OUT(10) <= Winner;
 	w <= Choice xor Guess;
+	screen <= Guess & Choice;
 	GPIO_1OUT(3 downto 2) <= PlacarP1;
 	GPIO_1OUT(5 downto 4) <= PlacarP2;
 	GPIO_1OUT(8 downto 6) <= p2_Guess;
@@ -69,8 +74,9 @@ begin
 	gerente1 : gerente port map(KEY(1), CLOCK_50, GPIO_1IN(1 downto 0), p2_Pal, GPIO_1IN(2), p2_Load, GPIO_1IN(5 downto 3), p2_Guess, GPIO_1OUT(0), GPIO_1OUT(1), Choice, Guess,
 										 PlacarP1, PlacarP2, Fim, Winner, LEDG(5));
 										 
-	this_user: user PORT MAP (Choice, Guess, En, '0', reset, GPIO_1IN(5 downto 3), wheel_action, mouse_buttons, LEDG(2 DOWNTO 0), p2_Pal, p2_Load, p2_Guess);
+	this_user: user PORT MAP (Choice, Guess, En, '0', reset, GPIO_1IN(5 downto 3), wheel_action, mouse_buttons, number_input, p2_Pal, p2_Load, p2_Guess);
 	
+	monitor1: test PORT MAP (mouse_buttons(1),PlacarP1, PlacarP2, number_input, screen, CLOCK_24(0), KEY(2), VGA_R, VGA_G, VGA_B, VGA_HS, VGA_VS);
 	--package gerente_package is
 	--component gerente is
 	--	port(
