@@ -6,4 +6,6 @@ incremental_db/
 output_files/
 simulation/
 test_package.vhd.bak
+monitorTest.qws
+user_package.vhd.bak
 

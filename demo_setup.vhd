@@ -4,7 +4,7 @@ library work;
 use ieee.std_logic_1164.all;
 use work.mouse_package.all;
 use work.user_package.all;
-use work.test_package.all;
+use work.monitor_package.all;
 
 entity demo_setup is
 -- winner: define o vencedor da rodada
@@ -84,5 +84,5 @@ begin
 	this_user: user PORT MAP (Choice, Guess, En, '0', reset, "111", wheel_action, mouse_buttons, number_input,
 									  GPIO_1OUT(1 downto 0), GPIO_1OUT(2), GPIO_1OUT(5 downto 3));
 	
-	monitor1	: test PORT MAP (mouse_buttons(1), PlacarP1, PlacarP2, number_input, screen, CLOCK_24(0), KEY(2), VGA_R, VGA_G, VGA_B, VGA_HS, VGA_VS);	
+	monitor1	: monitor PORT MAP (mouse_buttons(1), PlacarP1, PlacarP2, number_input, screen, CLOCK_24(0), KEY(2), VGA_R, VGA_G, VGA_B, VGA_HS, VGA_VS);	
 end behavior;

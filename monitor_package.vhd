@@ -1,8 +1,8 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 
-PACKAGE test_package IS
-	COMPONENT test IS
+PACKAGE monitor_package IS
+	COMPONENT monitor IS
 			PORT (
 			score_en				:IN STD_LOGIC;
 			score1, score2		: IN STD_LOGIC_VECTOR (1 DOWNTO 0);
@@ -15,4 +15,4 @@ PACKAGE test_package IS
 			VGA_HS, VGA_VS		: OUT STD_LOGIC
 		);
 	END COMPONENT;
-END test_package;
+END monitor_package;
