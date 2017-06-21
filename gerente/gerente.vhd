@@ -47,7 +47,7 @@ begin
 					end if;	
 					
 				when P2_Vez1 =>			
-					if P2_Load = '0' then
+					if P2_Load = '1' then
 						P2p := P2_Pal;
 						state <= P1_Vez2;
 					end if;
@@ -59,7 +59,7 @@ begin
 					end if;
 					
 				when P2_Vez2 =>
-					if P2_Load = '0' then
+					if P2_Load = '1' then
 						P2g := P2_Chute;
 						state <= Placar;						
 					end if;
@@ -69,7 +69,7 @@ begin
 					if(P1g = Total) then
 						P1_point := P1_point + '1';
 					elsif(P2g = Total) then
-						P2_point	:=	P1_point	+ '1';
+						P2_point	:=	P2_point	+ '1';
 					end if;
 					
 					if(P1_point = "11" or P2_point = "11") then
