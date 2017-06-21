@@ -3,8 +3,10 @@ USE ieee.std_logic_1164.ALL;
 
 PACKAGE test_package IS
 	COMPONENT test IS
-		PORT (
-			score1, score2, display_number		: IN STD_LOGIC_VECTOR (2 DOWNTO 0);
+			PORT (
+			score_en				:IN STD_LOGIC;
+			score1, score2		: IN STD_LOGIC_VECTOR (1 DOWNTO 0);
+			display_number		: IN STD_LOGIC_VECTOR (2 DOWNTO 0);
 			display_screen		: IN STD_LOGIC_VECTOR (1 DOWNTO 0);
 			
 			clk27M				: IN STD_LOGIC;

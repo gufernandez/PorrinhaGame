@@ -21,8 +21,6 @@ entity demo_setup is
 		
 			----------------------------	LED		----------------------------
 			LEDG				:		out	STD_LOGIC_VECTOR (7 downto 0);
-			--mouse_buttons 	:		out	STD_LOGIC_VECTOR (2 downto 0);
-			--wheel_action	:		out	STD_LOGIC_VECTOR (1 downto 0);
 			LEDR 	:		out	STD_LOGIC_VECTOR (9 downto 0);		--	LED Red[9:0]
 					
 			------------------------	PS2		--------------------------------
@@ -44,20 +42,15 @@ architecture behavior of demo_setup is
 	signal wheel_action, Placar, screen: std_logic_vector(1 downto 0);
 	signal number_input : std_logic_vector(2 downto 0);
 begin
-	Choice <= SW(0);
-	Guess <= SW(1);
+	Choice <= GPIO_1IN(0);
+	Guess <= GPIO_1IN(1);
 	Placar <= GPIO_1IN(3 downto 2);
 	Fim <= GPIO_1IN(4);
 	Winner <= GPIO_1IN(5);
 	w <= Choice xor Guess;
 	screen <= Guess & Choice;
 	LEDG(7) <= En;
-	--LEDG(6) <= GPIO_1IN(1);
 	
-	LEDG(5 downto 3) <= SW(9 downto 7);
-	LEDG(2 downto 0) <= SW(6 downto 4);
-	
-	LEDG(6) <= wheel_action(0);
 	process(Clock_50)
 	begin
 		case state is
@@ -86,8 +79,8 @@ begin
 
 	mouse1 : mouse port map(CLOCK_24, KEY, mouse_buttons, wheel_action, LEDR, PS2_DAT, PS2_CLK);
 
-	this_user: user PORT MAP (Choice, Guess, En, '0', reset, "000", wheel_action, mouse_buttons, number_input,
+	this_user: user PORT MAP (Choice, Guess, En, '0', reset, "111", wheel_action, mouse_buttons, number_input,
 									  GPIO_1OUT(1 downto 0), GPIO_1OUT(2), GPIO_1OUT(5 downto 3));
 	
-	monitor1	: test PORT MAP (SW(9 downto 7), SW(6 downto 4), number_input, screen, CLOCK_27(0), KEY(2), VGA_R, VGA_G, VGA_B, VGA_HS, VGA_VS);	
+	monitor1	: test PORT MAP (mouse_buttons(1), Placar, SW(6 downto 5), number_input, screen, CLOCK_24(0), KEY(2), VGA_R, VGA_G, VGA_B, VGA_HS, VGA_VS);	
 end behavior;

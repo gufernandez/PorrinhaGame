@@ -18,7 +18,7 @@ COMPONENT  user IS
 			guess_opt: IN STD_LOGIC_VECTOR(2 downto 0);
 			wheel_action: IN STD_LOGIC_VECTOR(1 downto 0);
 			mouse_buttons: IN STD_LOGIC_VECTOR(2 downto 0);
-			--P1, P2: IN STD_LOGIC_VECTOR(1 downto 0); N~ao faz mais sentido?
+			--P1, P2: IN STD_LOGIC_VECTOR(1 downto 0);
 			numero: OUT STD_LOGIC_VECTOR(2 downto 0);
 			pal: OUT STD_LOGIC_VECTOR(1 downto 0);
 			ld_output : BUFFER STD_LOGIC;
