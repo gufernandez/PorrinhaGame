@@ -492,11 +492,13 @@ set_location_assignment PIN_E20 -to GPIO_1OUT[7]
 set_location_assignment PIN_F20 -to GPIO_1OUT[8]
 set_location_assignment PIN_E19 -to GPIO_1OUT[9]
 set_location_assignment PIN_E18 -to GPIO_1OUT[10]
+set_global_assignment -name VHDL_FILE monitor_package.vhd
+set_global_assignment -name VHDL_FILE monitor.vhd
+set_global_assignment -name VHDL_FILE user_package.vhd
+set_global_assignment -name VHDL_FILE user.vhd
 set_global_assignment -name VHDL_FILE vgacon.vhd
 set_global_assignment -name VHDL_FILE test_package.vhd
 set_global_assignment -name VHDL_FILE test.vhd
-set_global_assignment -name VHDL_FILE user_package.vhd
-set_global_assignment -name VHDL_FILE user.vhd
 set_global_assignment -name VHDL_FILE ps2_iobase.vhd
 set_global_assignment -name VHDL_FILE mouse_package.vhd
 set_global_assignment -name VHDL_FILE mouse_ctrl.vhd

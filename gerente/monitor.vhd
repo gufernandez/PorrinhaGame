@@ -1,7 +1,7 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 
-ENTITY test IS
+ENTITY monitor IS
 	PORT (
 		score_en				:IN STD_LOGIC;
 		score1, score2		: IN STD_LOGIC_VECTOR (1 DOWNTO 0);
@@ -15,7 +15,7 @@ ENTITY test IS
 	);
 END ENTITY;
 
-ARCHITECTURE behavior OF TEST IS
+ARCHITECTURE behavior OF monitor IS
 	COMPONENT vgacon IS
 		GENERIC (
 			NUM_HORZ_PIXELS : NATURAL := 128;	-- Number of horizontal pixels
@@ -190,7 +190,7 @@ BEGIN
 				WHEN "10" =>
 					number_screen := two;
 				WHEN OTHERS =>
-					number_screen := six;
+					number_screen := three;
 			END CASE;
 			address := P2_SCORE-1;
 			number_addr := '1';

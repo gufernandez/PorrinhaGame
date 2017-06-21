@@ -4,7 +4,7 @@ use ieee.std_logic_1164.all;
 use work.gerente_package.all;
 use work.mouse_package.all;
 use work.user_package.all;
-use work.test_package.all;
+use work.monitor_package.all;
 
 entity demo_setup is
 	port (GPIO_1IN 		: 		IN STD_LOGIC_VECTOR(5 DOWNTO 0);
@@ -76,7 +76,7 @@ begin
 										 
 	this_user: user PORT MAP (Choice, Guess, En, '0', reset, GPIO_1IN(5 downto 3), wheel_action, mouse_buttons, number_input, p2_Pal, p2_Load, p2_Guess);
 	
-	monitor1: test PORT MAP (mouse_buttons(1),PlacarP1, PlacarP2, number_input, screen, CLOCK_24(0), KEY(2), VGA_R, VGA_G, VGA_B, VGA_HS, VGA_VS);
+	monitor1: monitor PORT MAP (mouse_buttons(1),PlacarP1, PlacarP2, number_input, screen, CLOCK_24(0), KEY(2), VGA_R, VGA_G, VGA_B, VGA_HS, VGA_VS);
 	--package gerente_package is
 	--component gerente is
 	--	port(
