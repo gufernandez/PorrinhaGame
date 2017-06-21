@@ -77,7 +77,7 @@ ARCHITECTURE behavior OF TEST IS
 	SHARED VARIABLE last_screen	: STD_LOGIC_VECTOR (1 DOWNTO 0) := "11";
 	SHARED VARIABLE print_number, printed_number, print_screen, printed_screen, number_addr, set_addr : STD_LOGIC := '0';
 	
-	SIGNAL clear_video_address	,
+	SIGNAL clear_video_address,
 		video_address			: INTEGER RANGE 0 TO HORZ_SIZE * VERT_SIZE - 1;
 		
 	SIGNAL clear_video_word		,
@@ -108,7 +108,7 @@ BEGIN
 	);
 ---------------------------------------------------------------------------------------------------------------------------------------------
 	addressing:
-	PROCESS (normal_video_word, clear_video_address, clear_video_word, number_video_word, normal_video_word)
+	PROCESS (normal_video_word, clear_video_address, clear_video_word, number_video_word, state)
 	BEGIN
 		IF (state = NORMAL) THEN
 			video_word <= normal_video_word;
@@ -157,26 +157,68 @@ BEGIN
 ----------------------------------------------------------------------------------------------------------------------------------------------
 	image_reader:
 	PROCESS(clk27M, reset, zero, one, two, three, four, five, six, p1_choose, p1_guess, score, waiting)
-	VARIABLE flag_screen: INTEGER range 0 to 2 := 0;
+	VARIABLE flag1_score, flag2_score: STD_LOGIC := '0';
 	BEGIN
 	IF (rising_edge(clk27M)) THEN	
+	
 		IF (set_addr = '1') THEN
 			number_addr := '0';
-
+			
+		ELSIF ((flag1_score = '1')  AND (print_number = '0') AND (print_screen = '0')) THEN
+			CASE score1 IS
+				WHEN "000" =>
+					number_screen := zero;
+				WHEN "001" =>
+					number_screen := one;
+				WHEN "010" =>
+					number_screen := two;
+				WHEN "011" =>
+					number_screen := three;
+				WHEN "100" =>
+					number_screen := four;
+				WHEN "101" =>
+					number_screen := five;
+				WHEN OTHERS =>
+					number_screen := six;
+			END CASE;
+			address := P1_SCORE-1;
+			number_addr := '1';
+			print_number := '1';
+		ELSIF ((flag2_score = '1')  AND (print_number = '0') AND (print_screen = '0')) THEN
+			CASE score2 IS
+				WHEN "000" =>
+					number_screen := zero;
+				WHEN "001" =>
+					number_screen := one;
+				WHEN "010" =>
+					number_screen := two;
+				WHEN "011" =>
+					number_screen := three;
+				WHEN "100" =>
+					number_screen := four;
+				WHEN "101" =>
+					number_screen := five;
+				WHEN OTHERS =>
+					number_screen := six;
+			END CASE;
+			address := P2_SCORE-1;
+			number_addr := '1';
+			print_number := '1';
+			
 		ELSIF (printed_number = '1') THEN
-			if (flag_screen= 2) then
-				flag_screen:= 1;
-			elsif (flag_screen= 1) then
-				flag_screen:= 0;
+			if (flag1_score = '1') then
+				flag2_score := '1';
+				flag1_score := '0';
+			elsif (flag2_score = '1') then
+				flag2_score := '0';
 			end if;
 			
 			print_number := '0';
 			
 		ELSIF (printed_screen = '1') THEN
-			print_screen := '0';
-			
-		END IF;
-		IF ((last_screen /= display_screen) AND (print_number = '0') AND (print_screen = '0')) THEN
+			print_screen := '0';	
+	
+		ELSIF ((last_screen /= display_screen) AND (print_number = '0') AND (print_screen = '0')) THEN
 			last_screen := display_screen;
 			CASE last_screen IS
 				WHEN "00" =>
@@ -187,52 +229,10 @@ BEGIN
 					user_screen := p1_guess;
 				WHEN OTHERS =>
 					user_screen := score;
-					flag_screen := 2;
+					flag1_score := '1';
 			END CASE;
 			print_screen := '1';
 			
-		ELSIF ((flag_screen/= 0)  AND (print_number = '0') AND (print_screen = '0')) THEN
-			IF (flag_screen = 1) THEN
-				CASE score1 IS
-					WHEN "000" =>
-						number_screen := zero;
-					WHEN "001" =>
-						number_screen := one;
-					WHEN "010" =>
-						number_screen := two;
-					WHEN "011" =>
-						number_screen := three;
-					WHEN "100" =>
-						number_screen := four;
-					WHEN "101" =>
-						number_screen := five;
-					WHEN OTHERS =>
-						number_screen := six;
-				END CASE;
-				address := P1_SCORE-1;
-				number_addr := '1';
-				print_number := '1';
-			ELSE
-				CASE score2 IS
-					WHEN "000" =>
-						number_screen := zero;
-					WHEN "001" =>
-						number_screen := one;
-					WHEN "010" =>
-						number_screen := two;
-					WHEN "011" =>
-						number_screen := three;
-					WHEN "100" =>
-						number_screen := four;
-					WHEN "101" =>
-						number_screen := five;
-					WHEN OTHERS =>
-						number_screen := six;
-				END CASE;
-				address := P2_SCORE-1;
-				number_addr := '1';
-				print_number := '1';
-			END IF;
 		ELSIF ((last_number /= display_number) AND (print_number = '0') AND (print_screen = '0')) THEN
 			last_number := display_number;
 			CASE last_number IS
@@ -302,12 +302,14 @@ BEGIN
 			
 		ELSIF (rising_edge(clk27M)) THEN
 			IF(print_number = '1') THEN
+				--IF (number_video_address /= address + 1) THEN
 				IF (number_addr = '1') THEN
 					number_video_address := address;
 					set_addr := '1';
 				ELSE
 					set_addr := '0';
 				END IF;
+				--END IF;
 				
 				IF (number_counter <= N_VECTOR_SIZE-1) THEN
 					IF (column_counter = N_WIDTH) THEN
